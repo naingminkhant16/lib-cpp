@@ -3,4 +3,3 @@
 3 A_Brief_History_of_Humankind Noah_Harari History ua
 4 The_Alchemist Paulo_Coelho Inspirational ua
 5 The_Hunger_Games Suzanne_Collins Fiction a
-6 fse thar_khant texh a
