@@ -42,22 +42,138 @@ public:
         else if (status == "ua")
             return "unavailable";
     }
-    void store()
+    bool store()
     {
         ofstream bookFile("book.txt", ios::app);
         bookFile << id << " " << title
                  << " " << author << " " << category << " " << status << endl;
         bookFile.close();
-        cout << "Successfully added." << endl;
+        return true;
     }
     void displayInfo()
     {
-        cout << "Book ID: \t" << id << endl;
-        cout << "Book Title: \t" << title << endl;
-        cout << "Book Author: \t" << author << endl;
-        cout << "Book Category: \t" << category << endl;
-        cout << "Book Status: \t" << getStatus() << endl;
-        cout << "------------------------------" << endl;
+        cout << endl
+             << "Book ID: \t" << id << endl
+             << "Book Title: \t" << title << endl
+             << "Book Author: \t" << author << endl
+             << "Book Category: \t" << category << endl
+             << "Book Status: \t" << getStatus() << endl
+             << "------------------------------" << endl;
+    }
+
+    bool edit(string id)
+    {
+        string line, temp[5], tempStr;
+        fstream file("book.txt", ios::in | ios::out);
+        bool control = true;
+
+        if (file.is_open())
+        {
+            while (getline(file, line))
+            {
+                stringstream ss(line);
+                int i = 0;
+                while (getline(ss, tempStr, ' '))
+                {
+                    temp[i] = tempStr;
+                    i++;
+                }
+
+                if (temp[0] == id) // id is found
+                {
+                    this->id = temp[0];
+                    this->title = temp[1];
+                    this->author = temp[2];
+                    this->category = temp[3];
+                    this->status = temp[4];
+
+                    cout << endl
+                         << "We found the following data:" << endl;
+                    displayInfo();
+
+                    do
+                    {
+                        cout << "Choose the number to edit : " << endl
+                             << endl;
+                        int selected_no;
+                        cout << "1 for title" << endl;
+                        cout << "2 for author" << endl;
+                        cout << "3 for category" << endl;
+                        cout << "4 for status" << endl;
+                        cout << "Enter number : ";
+                        cin >> selected_no;
+                        cout << endl;
+                        switch (selected_no)
+                        {
+                        case 1:
+                            cout << "Enter new title : " << endl;
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            getline(cin, title);
+                            for (int i = 0; i < title.length(); i++)
+                            {
+                                if (title[i] == ' ')
+                                    title[i] = '_';
+                            }
+                            control = false;
+                            break;
+                        case 2:
+                            cout << "Enter new author : " << endl;
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            getline(cin, author);
+                            for (int i = 0; i < author.length(); i++)
+                            {
+                                if (author[i] == ' ')
+                                    author[i] = '_';
+                            }
+                            control = false;
+                            break;
+                        case 3:
+                            cout << "Enter new category : " << endl;
+                            cin >> category;
+                            control = false;
+                            break;
+                        case 4:
+                            cout << "Enter new status ('a' for available / 'ua' for unavailable) : " << endl;
+                            cin >> status;
+                            control = false;
+                            break;
+                        default:
+                            cout << endl
+                                 << "Invalid number!" << endl
+                                 << "Choose again." << endl;
+                        }
+                    } while (control);
+                    file.close();
+                    // create and open temporary file
+                    ofstream outfile;
+                    file.open("book.txt");
+                    outfile.open("temp.txt", ios::app);
+
+                    while (getline(file, line))
+                    {
+                        if (line.find(this->id) == string::npos)
+                            outfile << line << endl;
+                        else
+                        {
+                            outfile << this->id << " " << this->title << " " << this->author
+                                    << " " << this->category << " " << this->status << endl;
+                        }
+                    }
+                    outfile.close();
+                    file.close();
+                    remove("book.txt");
+                    rename("temp.txt", "book.txt");
+
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            cout << endl
+                 << "Could not open file!" << endl;
+            return false;
+        }
     }
 };
 
@@ -105,12 +221,13 @@ public:
                     book.displayInfo();
                 }
             }
+            bookFile.close();
         }
         else
             cout << "Cannot open file!" << endl;
     }
 
-    void addNewBook(Book *book)
+    void addNewBook()
     {
         string id, title, author, category;
 
@@ -137,14 +254,32 @@ public:
         cout << "Enter Book's Category : ";
         cin >> category;
 
-        book->setId(id);
-        book->setTitle(title);
-        book->setAuthor(author);
-        book->setCategory(category);
-        book->store();
+        Book book;
+        book.setId(id);
+        book.setTitle(title);
+        book.setAuthor(author);
+        book.setCategory(category);
+
+        if (book.store())
+            cout << endl
+                 << "Successfully added." << endl;
+        else
+            cout << endl
+                 << "Failed to store new book!" << endl;
     }
-    void editBook(string id)
+
+    void editBook()
     {
+        string id;
+        cout << "Enter Book ID to edit book" << endl;
+        cin >> id;
+        Book book;
+        if (book.edit(id))
+            cout << endl
+                 << "Successfully updated data!" << endl;
+        else
+            cout << endl
+                 << "Data not found for id " << id << endl;
     }
 };
 
@@ -174,7 +309,6 @@ class LibraryMenu : public Menu
                                  "3. View all unavailable books in library",
                                  "4. Return to main menu"};
     Library library;
-    Book book;
 
 public:
     void displayMainMenu()
@@ -192,7 +326,11 @@ public:
             displaySubMenu();
             break;
         case 2:
-            library.addNewBook(&book);
+            library.addNewBook();
+            displayMainMenu();
+            break;
+        case 3:
+            library.editBook();
             displayMainMenu();
             break;
         case 5:

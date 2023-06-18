@@ -1,12 +1,6 @@
 1 To_Kill_a_Mockingbird Harper_Lee Fiction a
 2 The_Great_Gatsby Scott_Fitzgerald _Fiction ua
-3 A_Brief_History_of_Humankind Noah_Harari History a
+3 A_Brief_History_of_Humankind Noah_Harari History ua
 4 The_Alchemist Paulo_Coelho Inspirational ua
 5 The_Hunger_Games Suzanne_Collins Fiction a
-6 C++_Premier_Plus Stephen_Prata Tech a
-7 OOP's_Secret Naing_Min_Khant Tech a
-8 Something Thar_Khant Sport a
-9 PHP_Cook_Book Robert_Lafore Programming a
-10 Successful_Life Naing_Min_Khant Adventure a
-11 Encapsulation Thar_Khant Programming a
-12 Test test test ua
+6 fse thar_khant texh a
