@@ -103,10 +103,13 @@ bool Book::edit(string id)
                     cout << "Choose the number to edit : " << endl
                          << endl;
                     int selected_no;
+                    bool loop = true; // loop control for status validation
+
                     cout << "1 for title" << endl;
                     cout << "2 for author" << endl;
                     cout << "3 for category" << endl;
                     cout << "4 for status" << endl;
+                    cout << "5 for return to main menu" << endl;
                     cout << "Enter number : ";
                     cin >> selected_no;
                     cout << endl;
@@ -140,9 +143,19 @@ bool Book::edit(string id)
                         control = false;
                         break;
                     case 4:
-                        cout << "Enter new status ('a' for available / 'ua' for unavailable) : " << endl;
-                        cin >> status;
+                        do
+                        {
+                            cout << "Enter new status ('a' for available / 'ua' for unavailable) : " << endl;
+                            cin >> status;
+                            if (status == "a" || status == "ua")
+                                loop = false;
+                            else
+                                cout << "Invalid Input! Choose again." << endl;
+                        } while (loop);
                         control = false;
+                        break;
+                    case 5:
+                        return true;
                         break;
                     default:
                         cout << endl
@@ -170,7 +183,8 @@ bool Book::edit(string id)
                 file.close();
                 remove("book.txt");
                 rename("temp.txt", "book.txt");
-
+                cout << endl
+                     << "Successfully updated data!" << endl;
                 return true;
             }
         }
@@ -295,8 +309,28 @@ void Library::addNewBook()
     string id, title, author, category;
 
     cout << "Adding a new book" << endl;
-    cout << "Enter Book Id : ";
-    cin >> id;
+
+    // check duplicated id
+    do
+    {
+        bool control = true;
+        string line;
+        cout << "Enter Book Id : ";
+        cin >> id;
+        ifstream file("book.txt");
+        while (getline(file, line))
+        {
+            if (line.find(id) != string::npos) // id found
+            {
+                cout << "Duplicated ID found!"
+                     << " Enter the Id again." << endl;
+                control = false;
+                break;
+            }
+        }
+        if (control)
+            break;
+    } while (true);
 
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "Enter Book's Title : ";
@@ -350,10 +384,7 @@ void Library::editBook()
     cout << "Enter Book ID to edit book : " << endl;
     cin >> id;
     Book book;
-    if (book.edit(id))
-        cout << endl
-             << "Successfully updated data!" << endl;
-    else
+    if (!book.edit(id))
         cout << endl
              << "Data not found for id " << id << endl;
 }
