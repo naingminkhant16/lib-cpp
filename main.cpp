@@ -7,10 +7,11 @@ using namespace std;
 
 class Book
 {
-
+    // private properties of book class
     string id, title, author, category, status = "a";
 
 public:
+    // Implementation of Encapsulation
     void setId(string &id)
     {
         this->id = id;
@@ -37,19 +38,20 @@ public:
     string getCategory() { return category; }
     string getStatus()
     {
-        if (status == "a")
-            return "available";
-        else if (status == "ua")
-            return "unavailable";
+        return (status == "a") ? "available" : "unavailable"; // used ternary operator for the output of book's status
     }
-    bool store();
-    void displayInfo();
-    bool edit(string id);
-    bool destroy(string id);
+
+    // methods declaration
+    bool store();            // for adding new book
+    void displayInfo();      // display the output of the information of book
+    bool edit(string id);    // for editing the book's information base on book's id
+    bool destroy(string id); // for deleting the book base on book's id
 };
 
+// methods definition outside Book class
 void Book::displayInfo()
 {
+    // output book info
     cout << endl
          << "Book ID: \t" << id << endl
          << "Book Title: \t" << title << endl
@@ -59,16 +61,32 @@ void Book::displayInfo()
          << "------------------------------" << endl;
 }
 
-bool Book::store()
+bool Book::store() // return true on success, false on fail
 {
-    ofstream bookFile("book.txt", ios::app);
-    bookFile << id << " " << title
-             << " " << author << " " << category << " " << status << endl;
-    bookFile.close();
-    return true;
+    try
+    {
+        ofstream bookFile("book.txt", ios::app); // open book.txt file using ofstream
+        if (!bookFile.is_open())
+        {
+            string err_message = "Could not open file!";
+            throw(err_message); // throw exception if file can't open
+        }
+        // write new book's info to file
+        bookFile << id << " " << title
+                 << " " << author << " " << category << " " << status << endl;
+
+        bookFile.close(); // file close
+        return true;
+    }
+    catch (string error_message)
+    {
+        cerr << endl
+             << error_message << endl; // display error message
+        return false;
+    }
 }
 
-bool Book::edit(string id)
+bool Book::edit(string id) // find and edit book info //return true on success,otherwise false
 {
     string line, temp[5], tempStr;
     fstream file("book.txt", ios::in | ios::out);
@@ -76,7 +94,7 @@ bool Book::edit(string id)
 
     if (file.is_open())
     {
-        while (getline(file, line))
+        while (getline(file, line)) // get books by each line
         {
             stringstream ss(line);
             int i = 0;
@@ -100,16 +118,17 @@ bool Book::edit(string id)
 
                 do
                 {
-                    cout << "Choose the number to edit : " << endl
-                         << endl;
                     int selected_no;
                     bool loop = true; // loop control for status validation
 
-                    cout << "1 for title" << endl;
-                    cout << "2 for author" << endl;
-                    cout << "3 for category" << endl;
-                    cout << "4 for status" << endl;
-                    cout << "5 for return to main menu" << endl;
+                    cout << "Choose the number below to edit : " << endl
+                         << endl;
+
+                    cout << "Choose 1 to edit title." << endl;
+                    cout << "Choose 2 to edit author." << endl;
+                    cout << "Choose 3 to edit category." << endl;
+                    cout << "Choose 4 to edit status." << endl;
+                    cout << "Choose 5 to return to main menu." << endl;
                     cout << "Enter number : ";
                     cin >> selected_no;
                     cout << endl;
@@ -119,42 +138,42 @@ bool Book::edit(string id)
                         cout << "Enter new title : " << endl;
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
                         getline(cin, title);
-                        for (int i = 0; i < title.length(); i++)
+                        for (int i = 0; i < title.length(); i++) // rename the title into snake case
                         {
                             if (title[i] == ' ')
                                 title[i] = '_';
                         }
-                        control = false;
+                        control = false; // set control to false to get out of loop
                         break;
                     case 2:
                         cout << "Enter new author : " << endl;
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
                         getline(cin, author);
-                        for (int i = 0; i < author.length(); i++)
+                        for (int i = 0; i < author.length(); i++) // rename the author into snake case
                         {
                             if (author[i] == ' ')
                                 author[i] = '_';
                         }
-                        control = false;
+                        control = false; // set control to false to get out of loop
                         break;
                     case 3:
                         cout << "Enter new category : " << endl;
                         cin >> category;
-                        control = false;
+                        control = false; // set control to false to get out of loop
                         break;
                     case 4:
                         do
                         {
                             cout << "Enter new status ('a' for available / 'ua' for unavailable) : " << endl;
                             cin >> status;
-                            if (status == "a" || status == "ua")
-                                loop = false;
+                            if (status == "a" || status == "ua") // check if status is valid input
+                                loop = false;                    // break loop
                             else
                                 cout << "Invalid Input! Choose again." << endl;
                         } while (loop);
-                        control = false;
+                        control = false; // set control to false to get out of loop
                         break;
-                    case 5:
+                    case 5: // do nothing and return to main menu
                         return true;
                         break;
                     default:
@@ -164,25 +183,26 @@ bool Book::edit(string id)
                     }
                 } while (control);
                 file.close();
-                // create and open temporary file
+
                 ofstream outfile;
                 file.open("book.txt");
-                outfile.open("temp.txt", ios::app);
+                outfile.open("temp.txt", ios::app); // create and open temporary file
 
                 while (getline(file, line))
                 {
+                    // rewrite the existing data into temp file until it finds an id that wants to get updated
                     if (line.find(this->id) == string::npos)
                         outfile << line << endl;
                     else
-                    {
+                    { // write the new data if it is found
                         outfile << this->id << " " << this->title << " " << this->author
                                 << " " << this->category << " " << this->status << endl;
                     }
                 }
-                outfile.close();
+                outfile.close(); // temp file close
                 file.close();
-                remove("book.txt");
-                rename("temp.txt", "book.txt");
+                remove("book.txt");             // delete book file
+                rename("temp.txt", "book.txt"); // and rename temp.txt to book.txt
                 cout << endl
                      << "Successfully updated data!" << endl;
                 return true;
@@ -200,54 +220,54 @@ bool Book::edit(string id)
     }
 }
 
-bool Book::destroy(string id)
+bool Book::destroy(string id) // find and delete book with id // return true on success,otherwise false
 {
     string line, book_id;
     fstream file("book.txt", ios::in | ios::out);
 
-    if (file.is_open())
+    if (!file.is_open())
     {
-        while (getline(file, line))
-        {
-            stringstream ss(line);
-
-            getline(ss, book_id, ' '); // get id from line
-
-            if (book_id == id) // id is found
-            {
-                file.close();
-
-                // create and open temporary file
-                ofstream outfile;
-                file.open("book.txt");
-                outfile.open("temp.txt", ios::app);
-
-                while (getline(file, line))
-                    if (line.find(id) == string::npos)
-                        outfile << line << endl;
-
-                outfile.close();
-                file.close();
-                remove("book.txt");
-                rename("temp.txt", "book.txt");
-
-                return true;
-            }
-        }
-        cout << "Not found" << endl;
-        return false;
-    }
-    else
-    {
-        cout << endl
+        cerr << endl
              << "Could not open file!" << endl;
         return false;
     }
+
+    while (getline(file, line))
+    {
+        stringstream ss(line);
+
+        getline(ss, book_id, ' '); // get id from line
+
+        if (book_id == id) // id is found
+        {
+            file.close();
+
+            // create and open temporary file
+            ofstream outfile;
+            file.open("book.txt");
+            outfile.open("temp.txt", ios::app);
+
+            while (getline(file, line))
+                if (line.find(id) == string::npos) // rewriting existing data expect the given id
+                    outfile << line << endl;
+
+            outfile.close();
+            file.close();
+            remove("book.txt");             // delete book file
+            rename("temp.txt", "book.txt"); // rename temp.txt to book.txt
+
+            return true;
+        }
+    }
+    // if the search id is not found, the code will reach here, and print 'Not found' and return false
+    cout << "Not found" << endl;
+    return false;
 }
 
 class Library
 {
 public:
+    // methods declaration for Library class
     void viewBookList(string type);
 
     void addNewBook();
@@ -257,9 +277,11 @@ public:
     void deleteBook();
 };
 
-void Library::viewBookList(string type)
+// methods definition outsie Library class
+void Library::viewBookList(string type) // display books' info according to type
 {
-    string header;
+    string header, temp[5], tmpStr, line;
+
     if (type == "all")
         header = "all";
     else if (type == "a")
@@ -271,8 +293,7 @@ void Library::viewBookList(string type)
          << "View " << header << " books" << endl
          << endl;
 
-    ifstream bookFile("book.txt");
-    string temp[5], tmpStr, line;
+    ifstream bookFile("book.txt"); // open book file
 
     if (bookFile.is_open())
     {
@@ -287,7 +308,7 @@ void Library::viewBookList(string type)
                 i++;
             }
 
-            if (type == temp[4] || type == "all")
+            if (type == temp[4] || type == "all") // display book's info base on type
             {
                 Book book;
                 book.setId(temp[0]);
@@ -298,13 +319,13 @@ void Library::viewBookList(string type)
                 book.displayInfo();
             }
         }
-        bookFile.close();
+        bookFile.close(); // close book file
     }
     else
         cout << "Cannot open file!" << endl;
 }
 
-void Library::addNewBook()
+void Library::addNewBook() // for storing new book
 {
     string id, title, author, category;
 
@@ -317,7 +338,7 @@ void Library::addNewBook()
         string line;
         cout << "Enter Book Id : ";
         cin >> id;
-        ifstream file("book.txt");
+        ifstream file("book.txt"); // open book file to check duplicated id
         while (getline(file, line))
         {
             if (line.find(id) != string::npos) // id found
@@ -328,14 +349,14 @@ void Library::addNewBook()
                 break;
             }
         }
-        if (control)
-            break;
+        if (control) // control will still be true if duplicated id is not found
+            break;   // break the loop
     } while (true);
 
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "Enter Book's Title : ";
     getline(cin, title);
-    for (int i = 0; i < title.length(); i++)
+    for (int i = 0; i < title.length(); i++) // rename title to snake case
     {
         if (title[i] == ' ')
             title[i] = '_';
@@ -343,7 +364,7 @@ void Library::addNewBook()
 
     cout << "Enter Book's Author : ";
     getline(cin, author);
-    for (int i = 0; i < author.length(); i++)
+    for (int i = 0; i < author.length(); i++) // rename author to snake case
     {
         if (author[i] == ' ')
             author[i] = '_';
@@ -351,13 +372,14 @@ void Library::addNewBook()
     cout << "Enter Book's Category : ";
     cin >> category;
 
+    // set book infos using setter methods
     Book book;
     book.setId(id);
     book.setTitle(title);
     book.setAuthor(author);
     book.setCategory(category);
 
-    if (book.store())
+    if (book.store()) // book.store() will return true on success,otherwise false
         cout << endl
              << "Successfully added." << endl;
     else
@@ -365,26 +387,27 @@ void Library::addNewBook()
              << "Failed to store new book!" << endl;
 }
 
-void Library::deleteBook()
+void Library::deleteBook() // for deleting book
 {
     string id;
+    Book book;
     cout << "Enter Book ID to delete book : " << endl;
     cin >> id;
-    Book book;
-    if (book.destroy(id))
+    if (book.destroy(id)) // book.destroy(id) will return true on success,otherwise false
         cout << endl
              << "Successfully deleted!" << endl;
     else
         cout << endl
              << "Data not found for id " << id << endl;
 }
+
 void Library::editBook()
 {
     string id;
+    Book book;
     cout << "Enter Book ID to edit book : " << endl;
     cin >> id;
-    Book book;
-    if (!book.edit(id))
+    if (!book.edit(id)) // book.edit(id) will return true on success,otherwise false
         cout << endl
              << "Data not found for id " << id << endl;
 }
@@ -396,13 +419,11 @@ protected:
     void displayMenuList(const string menus[], int size);
 };
 
+// method for displaying menu list
 void Menu::displayMenuList(const string menus[], int size)
 {
     for (int i = 0; i < size; i++)
-    {
-        cout << "\t" << menus[i]
-             << endl;
-    }
+        cout << "\t" << menus[i] << endl;
 }
 
 class LibraryMenu : public Menu
@@ -424,13 +445,13 @@ public:
     void displaySubMenu();
 };
 
-void LibraryMenu::displayMainMenu()
+void LibraryMenu::displayMainMenu() // for main menu
 {
     cout << endl
          << "Main Menu (Choose one number)." << endl
          << endl;
 
-    displayMenuList(MAIN_MENUS, sizeof(MAIN_MENUS) / sizeof(string));
+    displayMenuList(MAIN_MENUS, sizeof(MAIN_MENUS) / sizeof(string)); // displaying main menus
     cin >> selected_menu_no;
 
     switch (selected_menu_no)
@@ -461,27 +482,27 @@ void LibraryMenu::displayMainMenu()
     }
 }
 
-void LibraryMenu::displaySubMenu()
+void LibraryMenu::displaySubMenu() // for sub menu
 {
     cout << endl
          << "Display book list sub menu (Choose one number)." << endl
          << endl;
 
-    displayMenuList(SUB_MENUS, sizeof(SUB_MENUS) / sizeof(string));
+    displayMenuList(SUB_MENUS, sizeof(SUB_MENUS) / sizeof(string)); // displaying sub menus
     cin >> selected_menu_no;
 
     switch (selected_menu_no)
     {
     case 1:
-        library.viewBookList("all");
+        library.viewBookList("all"); // viewing all books' info
         displaySubMenu();
         break;
     case 2:
-        library.viewBookList("a");
+        library.viewBookList("a"); // viewing available books' info
         displaySubMenu();
         break;
     case 3:
-        library.viewBookList("ua");
+        library.viewBookList("ua"); // viewing unavailable books' info
         displaySubMenu();
         break;
     case 4:
