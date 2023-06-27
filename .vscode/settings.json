@@ -5,6 +5,7 @@
         "iostream": "cpp",
         "limits": "cpp",
         "*.tcc": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "iomanip": "cpp"
     }
 }

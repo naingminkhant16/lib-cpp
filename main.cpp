@@ -2,6 +2,7 @@
 #include <fstream>
 #include <limits>
 #include <sstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -53,12 +54,14 @@ void Book::displayInfo()
 {
     // output book info
     cout << endl
-         << "Book ID: \t" << id << endl
-         << "Book Title: \t" << title << endl
-         << "Book Author: \t" << author << endl
-         << "Book Category: \t" << category << endl
-         << "Book Status: \t" << getStatus() << endl
-         << "------------------------------" << endl;
+         << setfill('-')
+         << "+" << right << setw(51) << "+" << endl
+         << left << setw(20) << "| ID" << right << setw(30) << id << " |" << endl
+         << left << setw(20) << "| Title" << right << setw(30) << title << " |" << endl
+         << left << setw(20) << "| Author" << right << setw(30) << author << " |" << endl
+         << left << setw(20) << "| Category" << right << setw(30) << category << " |" << endl
+         << left << setw(20) << "| Status:" << right << setw(30) << getStatus() << " |" << endl
+         << "+" << right << setw(51) << "+" << endl;
 }
 
 bool Book::store() // return true on success, false on fail
@@ -113,7 +116,7 @@ bool Book::edit(string id) // find and edit book info //return true on success,o
                 this->status = temp[4];
 
                 cout << endl
-                     << "We found the following data:" << endl;
+                     << "We found the following data." << endl;
                 displayInfo();
 
                 do
@@ -121,21 +124,23 @@ bool Book::edit(string id) // find and edit book info //return true on success,o
                     int selected_no;
                     bool loop = true; // loop control for status validation
 
-                    cout << "Choose the number below to edit : " << endl
+                    cout << endl
+                         << "Choose the number below to edit. " << endl
                          << endl;
 
                     cout << "Choose 1 to edit title." << endl;
                     cout << "Choose 2 to edit author." << endl;
                     cout << "Choose 3 to edit category." << endl;
                     cout << "Choose 4 to edit status." << endl;
-                    cout << "Choose 5 to return to main menu." << endl;
+                    cout << "Choose 5 to return to main menu." << endl
+                         << endl;
                     cout << "Enter number : ";
                     cin >> selected_no;
                     cout << endl;
                     switch (selected_no)
                     {
                     case 1:
-                        cout << "Enter new title : " << endl;
+                        cout << "Enter new title : ";
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
                         getline(cin, title);
                         for (int i = 0; i < title.length(); i++) // rename the title into snake case
@@ -146,7 +151,7 @@ bool Book::edit(string id) // find and edit book info //return true on success,o
                         control = false; // set control to false to get out of loop
                         break;
                     case 2:
-                        cout << "Enter new author : " << endl;
+                        cout << "Enter new author : ";
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
                         getline(cin, author);
                         for (int i = 0; i < author.length(); i++) // rename the author into snake case
@@ -157,14 +162,14 @@ bool Book::edit(string id) // find and edit book info //return true on success,o
                         control = false; // set control to false to get out of loop
                         break;
                     case 3:
-                        cout << "Enter new category : " << endl;
+                        cout << "Enter new category : ";
                         cin >> category;
                         control = false; // set control to false to get out of loop
                         break;
                     case 4:
                         do
                         {
-                            cout << "Enter new status ('a' for available / 'ua' for unavailable) : " << endl;
+                            cout << "Enter new status ('a' for available / 'ua' for unavailable) : ";
                             cin >> status;
                             if (status == "a" || status == "ua") // check if status is valid input
                                 loop = false;                    // break loop
@@ -177,9 +182,9 @@ bool Book::edit(string id) // find and edit book info //return true on success,o
                         return true;
                         break;
                     default:
-                        cout << endl
-                             << "Invalid number!" << endl
-                             << "Choose again." << endl;
+                        cout
+                            << "Invalid number!" << endl
+                            << "Choose again." << endl;
                     }
                 } while (control);
                 file.close();
@@ -260,7 +265,8 @@ bool Book::destroy(string id) // find and delete book with id // return true on 
         }
     }
     // if the search id is not found, the code will reach here, and print 'Not found' and return false
-    cout << "Not found" << endl;
+    cout << endl
+         << "Not found" << endl;
     return false;
 }
 
@@ -290,8 +296,9 @@ void Library::viewBookList(string type) // display books' info according to type
         header = "unavailable";
 
     cout << endl
+         << "----------------------------------------------------" << endl
          << "View " << header << " books" << endl
-         << endl;
+         << "----------------------------------------------------" << endl;
 
     ifstream bookFile("book.txt"); // open book file
 
@@ -329,13 +336,17 @@ void Library::addNewBook() // for storing new book
 {
     string id, title, author, category;
 
-    cout << "Adding a new book" << endl;
+    cout << endl
+         << "----------------------------------------------------" << endl
+         << "Adding a new book" << endl
+         << "----------------------------------------------------" << endl;
 
     // check duplicated id
     do
     {
         bool control = true;
         string line;
+        cout << endl;
         cout << "Enter Book Id : ";
         cin >> id;
         ifstream file("book.txt"); // open book file to check duplicated id
@@ -391,21 +402,42 @@ void Library::deleteBook() // for deleting book
 {
     string id;
     Book book;
-    cout << "Enter Book ID to delete book : " << endl;
+    char confirm;
+    cout << endl
+         << "----------------------------------------------------" << endl
+         << "Deleting Book" << endl
+         << "----------------------------------------------------" << endl;
+
+    cout << endl
+         << "Enter Book ID to delete book : ";
     cin >> id;
-    if (book.destroy(id)) // book.destroy(id) will return true on success,otherwise false
-        cout << endl
-             << "Successfully deleted!" << endl;
+
+    cout << "Are you sure you want to delete?(y/n)? : ";
+    cin >> confirm;
+    confirm = tolower(confirm);
+    if (confirm == 'y')
+    {
+        if (book.destroy(id)) // book.destroy(id) will return true on success,otherwise false
+            cout << endl
+                 << "Successfully deleted!" << endl;
+        else
+            cout << endl
+                 << "Data not found for id " << id << "!" << endl;
+    }
     else
-        cout << endl
-             << "Data not found for id " << id << endl;
+        cout << "Cancelled Delete!" << endl;
 }
 
 void Library::editBook()
 {
     string id;
     Book book;
-    cout << "Enter Book ID to edit book : " << endl;
+    cout << endl
+         << "----------------------------------------------------" << endl
+         << "Editing Book" << endl
+         << "----------------------------------------------------" << endl;
+    cout << endl
+         << "Enter Book ID to edit book : ";
     cin >> id;
     if (!book.edit(id)) // book.edit(id) will return true on success,otherwise false
         cout << endl
@@ -414,10 +446,24 @@ void Library::editBook()
 
 class Menu
 {
+public:
+    Menu(); // constructor declaration
+
 protected:
+    string guest_name;
     int selected_menu_no;
     void displayMenuList(const string menus[], int size);
 };
+
+Menu::Menu() // constructor definition outside class
+{
+    cout << "Please Enter your name : ";
+    getline(cin, guest_name);
+    cout << endl
+         << "----------------------------------------------------" << endl
+         << "Hello, " << guest_name << ". Welcome to our library." << endl
+         << "----------------------------------------------------" << endl;
+}
 
 // method for displaying menu list
 void Menu::displayMenuList(const string menus[], int size)
@@ -448,10 +494,12 @@ public:
 void LibraryMenu::displayMainMenu() // for main menu
 {
     cout << endl
-         << "Main Menu (Choose one number)." << endl
+         << "➡ Main Menu (Choose one number)." << endl
          << endl;
 
     displayMenuList(MAIN_MENUS, sizeof(MAIN_MENUS) / sizeof(string)); // displaying main menus
+    cout << endl
+         << "Choose a number : ";
     cin >> selected_menu_no;
 
     switch (selected_menu_no)
@@ -461,22 +509,28 @@ void LibraryMenu::displayMainMenu() // for main menu
         break;
     case 2:
         library.addNewBook();
+        cout << "_____________________________________________________" << endl;
         displayMainMenu();
         break;
     case 3:
         library.editBook();
+        cout << "_____________________________________________________" << endl;
         displayMainMenu();
         break;
     case 4:
         library.deleteBook();
+        cout << "_____________________________________________________" << endl;
         displayMainMenu();
         break;
     case 5:
-        cout << "Bye Bye" << endl;
+        cout << endl
+             << "Good Bye, " << guest_name << ". See you again." << endl;
         break;
     default:
         cout << "Invalid number!" << endl;
         cout << "Choose again!" << endl;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         displayMainMenu();
         break;
     }
@@ -485,32 +539,40 @@ void LibraryMenu::displayMainMenu() // for main menu
 void LibraryMenu::displaySubMenu() // for sub menu
 {
     cout << endl
-         << "Display book list sub menu (Choose one number)." << endl
+         << "➡ Display book list sub menu (Choose one number)." << endl
          << endl;
 
     displayMenuList(SUB_MENUS, sizeof(SUB_MENUS) / sizeof(string)); // displaying sub menus
+    cout << endl
+         << "Choose a number : ";
     cin >> selected_menu_no;
 
     switch (selected_menu_no)
     {
     case 1:
         library.viewBookList("all"); // viewing all books' info
+        cout << "_____________________________________________________" << endl;
         displaySubMenu();
         break;
     case 2:
         library.viewBookList("a"); // viewing available books' info
+        cout << "_____________________________________________________" << endl;
         displaySubMenu();
         break;
     case 3:
         library.viewBookList("ua"); // viewing unavailable books' info
+        cout << "_____________________________________________________" << endl;
         displaySubMenu();
         break;
     case 4:
+        cout << "_____________________________________________________" << endl;
         displayMainMenu();
         break;
     default:
         cout << "Invalid number! " << endl
              << "Choose again." << endl;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         displaySubMenu();
         break;
     }
@@ -518,14 +580,6 @@ void LibraryMenu::displaySubMenu() // for sub menu
 
 int main()
 {
-    string guest_name;
-    cout << "Please Enter your name :";
-    getline(cin, guest_name);
-    cout << endl
-         << "----------------------------------------------" << endl
-         << "Hello " << guest_name << ". Welcome to our library." << endl
-         << "----------------------------------------------" << endl;
-
     LibraryMenu library_menu;
     library_menu.displayMainMenu();
     return 0;
