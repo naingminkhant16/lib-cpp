@@ -447,8 +447,8 @@ void Library::editBook()
 class Menu
 {
 public:
-    Menu(); // constructor declaration
-
+    Menu();  // constructor declaration
+    ~Menu(); // destructor declaration
 protected:
     string guest_name;
     int selected_menu_no;
@@ -463,6 +463,11 @@ Menu::Menu() // constructor definition outside class
          << "----------------------------------------------------" << endl
          << "Hello, " << guest_name << ". Welcome to our library." << endl
          << "----------------------------------------------------" << endl;
+}
+Menu::~Menu() // destructor definition outside class
+{
+    cout << endl
+         << "Good Bye, " << guest_name << ". See you again." << endl;
 }
 
 // method for displaying menu list
@@ -523,8 +528,6 @@ void LibraryMenu::displayMainMenu() // for main menu
         displayMainMenu();
         break;
     case 5:
-        cout << endl
-             << "Good Bye, " << guest_name << ". See you again." << endl;
         break;
     default:
         cout << "Invalid number!" << endl;
