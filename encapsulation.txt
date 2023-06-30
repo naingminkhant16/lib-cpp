@@ -1,9 +1,0 @@
-Encapsulation
-=============
-
-Encapsulation is one of the features of Object-Oriented Programming.
-Encapsulation can be defined as setting the data of a class as private properties and manipulate them by using class functions.
-Those class functions can only be accessed by an object of its class and must use only member variables.
-If there is no function inside the class that is using the member variable of the class, it cannot be called encapsulation.
-By using encapsulation, the security of class data can be increased and it also helps to control the modification of class data members.
-===========================================================
